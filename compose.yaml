@@ -1,0 +1,44 @@
+services:
+  # Define el servicio web
+  web:
+    build: .
+    container_name: diviflex
+    volumes:
+      - ./app:/var/www/html
+    ports:
+      - "80:80"
+    networks:
+      - web_network
+
+  # Define el servicio de BD
+  db:
+    image: postgres
+    container_name: database
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - database_data:/var/lib/postgresql
+    networks:
+      - web_network
+    restart: always
+
+  # Servicio de gestión web para PostgreSQL
+  cloudbeaver:
+    image: dbeaver/cloudbeaver
+    container_name: dbeaver
+    ports:
+      - 8082:8978
+    volumes:
+      - dbeaver_data:/opt/cloudbeaver/workspace
+    networks:
+      - web_network
+    restart: always
+
+volumes:
+  database_data:
+  dbeaver_data:
+networks:
+  web_network:
+    driver: bridge
