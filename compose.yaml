@@ -1,16 +1,21 @@
+
 services:
-  # Define el servicio web
-  web:
-    build: .
-    container_name: diviflex
+  # Servidor web Apache + PHP + Laravel + SSL
+  webserver:
+    container_name: webserver
+    build:
+      context: .
     volumes:
       - ./app:/var/www/html
+      - ./certs:/etc/letsencrypt:ro
     ports:
       - "80:80"
+      - "443:443"
     networks:
       - web_network
+    restart: unless-stopped
 
-  # Define el servicio de BD
+  # Base de datos PostgreSQL
   db:
     image: postgres
     container_name: database
@@ -24,12 +29,12 @@ services:
       - web_network
     restart: always
 
-  # Servicio de gestión web para PostgreSQL
+  # Gestión web de PostgreSQL
   cloudbeaver:
     image: dbeaver/cloudbeaver
     container_name: dbeaver
     ports:
-      - 8082:8978
+      - "8082:8978"
     volumes:
       - dbeaver_data:/opt/cloudbeaver/workspace
     networks:
@@ -39,6 +44,7 @@ services:
 volumes:
   database_data:
   dbeaver_data:
+
 networks:
   web_network:
     driver: bridge
